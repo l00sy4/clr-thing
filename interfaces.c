@@ -86,10 +86,18 @@ HRESULT M_VirtualProtect( MyHostMemoryManager* This, IN void* lpAddress, IN SIZE
 }
 
 HRESULT GetMemoryLoad( MyHostMemoryManager* This, OUT DWORD* pMemoryLoad, OUT SIZE_T* pAvailableBytes ) {
-    // copied, need to actually obtain these values somehow
-    *pMemoryLoad     = 30;
-    *pAvailableBytes = 100 * 1024 * 1024;
-    return S_OK;
+
+		MEMORYSTATUSEX MemoryStatus{};
+
+		if (GlobalMemoryStatusEx(&MemoryStatus) == FALSE)
+		{
+			return E_FAIL;
+		}
+
+		*pMemoryLoad     = MemoryStatus.dwMemoryLoad;
+		*pAvailableBytes = MemoryStatus.ullAvailPhys / 2;
+
+		return S_OK;
 }
 
 HRESULT RegisterMemoryNotificationCallback( MyHostMemoryManager* This, IN ICLRMemoryNotificationCallback* pCallback ) {
